@@ -12,48 +12,52 @@
 
     <div class="bg-[#1a1a1a] w-[360px] rounded-lg shadow-md border border-gray-200 p-4">
 
+        <!-- Header -->
         <div class="flex items-center justify-between mb-4">
-            <h1 class="text-white text-lg font-semibold">
+            <h1 class="text-white text-center text-lg w-full font-semibold">
                 Calculator
             </h1>
-
-            <select class="text-sm px-2 bg-[#1a1a1a] py-1 rounded border border-gray-300
-                       text-white  focus:outline-none">
-                <option>Basic</option>
-                <option>Scientific</option>
-            </select>
         </div>
 
+
         <input type="text" id="cal-input"
-            class="w-full mb-4 p-3 text-right text-xl  rounded border border-gray-300 text-white focus:outline-none">
+            class="w-full mb-4 p-3 text-right text-xl rounded border border-gray-300 text-white focus:outline-none">
+
+
 
         <div class="grid grid-cols-4 gap-3 text-white place-items-center">
+            <div class="btn">C</div>
+            <div class="btn">√</div>
+            <div class="btn col-span-2 text-center w-full">Backspace</div>
+            <div class="btn">%</div>
+            <div class="btn">sin</div>
+            <div class="btn">cos</div>
+            <div class="btn">tan</div>
 
-            <div class="btn-num">1</div>
-            <div class="btn-num">2</div>
-            <div class="btn-num">3</div>
-            <div class="btn-op">+</div>
+            <div class="btn">1</div>
+            <div class="btn">2</div>
+            <div class="btn">3</div>
+            <div class="btn">+</div>
 
-            <div class="btn-num">4</div>
-            <div class="btn-num">5</div>
-            <div class="btn-num">6</div>
-            <div class="btn-op">−</div>
+            <div class="btn">4</div>
+            <div class="btn">5</div>
+            <div class="btn">6</div>
+            <div class="btn">-</div>
 
-            <div class="btn-num">7</div>
-            <div class="btn-num">8</div>
-            <div class="btn-num">9</div>
-            <div class="btn-op">×</div>
+            <div class="btn">7</div>
+            <div class="btn">8</div>
+            <div class="btn">9</div>
+            <div class="btn">*</div>
 
-            <div class="btn-num">.</div>
-            <div class="btn-num">0</div>
-            <div class="btn-op">÷</div>
+            <div class="btn">.</div>
+            <div class="btn">0</div>
+            <div class="btn">/</div>
             <div class="btn-eq">=</div>
 
         </div>
     </div>
 
     <script src="script.js"></script>
-
 
 </body>
 
