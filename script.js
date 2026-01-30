@@ -52,6 +52,8 @@ function tokenization(expression) {
         return 'invalid'
     }
 
+
+
     for (let i = 0; i < expression.length; i++) {
         let char = expression[i];
 
@@ -60,11 +62,33 @@ function tokenization(expression) {
         }
 
         if ((char <= '9' && char >= '0') || char == '.') {
+
             if (buffer.includes('.') && char == '.') {
                 return 'invalid'
             } else {
                 buffer += char;
             }
+
+        } else if (char == 's' || char == 't' || char == 'c') {
+
+            if (expression.substring(i, i + 3) == 'sin' || expression.substring(i, i + 3) == 'cos' || expression.substring(i, i + 3) == 'tan') {
+
+
+                if (buffer.length > 0) {
+                    tokens.push(buffer)
+                    buffer = ''
+                }
+
+                tokens.push(expression?.substring(i, i + 3))
+
+                i += 2;
+                continue;
+            }
+
+            return 'invalid'
+
+
+
         } else {
             if (buffer.length > 0) {
                 tokens.push(buffer)
@@ -74,8 +98,6 @@ function tokenization(expression) {
             buffer += char;
 
             if (tokens[tokens.length - 1] == buffer && (char != '(' && char != ')')) {
-                console.log("hssss");
-
                 return 'invalid'
             }
 
@@ -85,7 +107,7 @@ function tokenization(expression) {
 
 
     }
-    
+
     if (buffer.length > 0) {
         tokens.push(buffer)
     }
@@ -101,6 +123,100 @@ function tokenization(expression) {
 
 function evaluateTokens(tokens) {
 
+    // sin(2.5 + 3) + cos(4 * (1.5 + 0.5)) - √(9 / 0.25) + tan(30)
+
+    // ['sin', '(', '2.5', '+', '3', ')', '+', 'cos', '(', '4', '*', '(', '1.5', '+', '0.5', ')', ')', '-', '√', '(', '9', '/', '0.25', ')', '+', 'tan', '(', '30', ')']
+
+    while (tokens.includes('sin') || tokens.includes('cos') || tokens.includes('tan')) {
+
+        let opIndex = -1;
+        let funName = '';
+
+        if (tokens.includes('sin')) {
+            opIndex = tokens.indexOf('sin');
+            funName = 'sin';
+        } else if (tokens.includes('cos')) {
+            opIndex = tokens.indexOf('cos');
+            funName = 'cos';
+        } else {
+            opIndex = tokens.indexOf('tan');
+            funName = 'tan';
+        }
+
+        let start = -1;
+        let end = -1;
+        let count = 0;
+
+        for (let i = opIndex + 1; i < tokens.length; i++) {
+            if (tokens[i] === '(') {
+                if (count === 0) start = i;
+                count++;
+            }
+            else if (tokens[i] === ')') {
+                count--;
+                if (count === 0) {
+                    end = i;
+                    break;
+                }
+            }
+        }
+
+        if (start === opIndex || end === opIndex) {
+            return 'Syntax Error';
+        }
+
+        let res = evaluateTokens(tokens.slice(start + 1, end));
+
+        if (res === undefined || isNaN(res)) {
+            return 'Syntax Error';
+        }
+
+        let radians = (res * Math.PI) / 180;
+        let funcResult = 0;
+
+        if (funName === 'sin') {
+            funcResult = Math.sin(radians);
+        } else if (funName === 'cos') {
+            funcResult = Math.cos(radians);
+        } else {
+            if (res % 180 === 90) {
+                return 'Undefined';
+            }
+            funcResult = Math.tan(radians);
+        }
+
+        funcResult = Number(funcResult.toFixed(10));
+
+        tokens.splice(start - 1, end - start + 2, funcResult);
+    }
+
+
+    while (tokens.includes('√')) {
+        const rootIndex = tokens.indexOf('√')
+
+        let start = rootIndex;
+        let end = rootIndex;
+
+        for (let i = rootIndex; i < tokens.length; i++) {
+            if (tokens[i] === '(') {
+                start = i;
+            }
+            else if (tokens[i] === ')') {
+                end = i;
+                break;
+            }
+        }
+
+        if (start === rootIndex || end === rootIndex) {
+            return 'Syntax Error';
+        }
+        const res = evaluateTokens(tokens.slice(start + 1, end));
+        console.log(res);
+        const funcResult = Math.sqrt(res);
+        console.log(tokens.splice(rootIndex, end - start + 2, funcResult));
+
+
+    }
 
     while (tokens.includes('(')) {
 
@@ -123,8 +239,10 @@ function evaluateTokens(tokens) {
 
         const innerTokens = tokens.slice(start + 1, end);
         const innerResult = evaluateTokens(innerTokens);
+        console.log("Inner Result ", innerResult);
 
         tokens.splice(start, end - start + 1, innerResult.toString());
+
     }
 
     for (let i = 0; i < tokens.length; i++) {
@@ -209,7 +327,7 @@ input.addEventListener('keyup', (keyPress) => {
     if (keyPress.key == 'Enter') {
         let expression = input.value
         // console.log(expression);
-        const tokens = tokenization(expression)
+        const tokens = tokenization(expression?.toLowerCase())
         console.log(tokens);
 
         if (tokens === 'invalid') {
