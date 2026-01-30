@@ -7,13 +7,11 @@ calMode.addEventListener('change', (e) => {
             btn.classList.remove('hidden');
         });
 
-        document.getElementById('clear-input').classList.remove('col-span-2');
+        document.getElementById('backspace').classList.remove('col-span-2');
     } else if (mode === 'basic') {
         document.querySelectorAll('.scify-btn').forEach(btn => {
             btn.classList.add('hidden');
         });
-
-        document.getElementById('clear-input').classList.add('col-span-2');
     }
 });
 
@@ -22,7 +20,7 @@ const input = document.getElementById('cal-input')
 const btns = document.querySelectorAll('.btn')
 input.focus();
 
-// const functions = ["sin", "cos", "tan", "√", "%"];
+const functions = ["sin", "cos", "tan", "√", "%"];
 const operators = "*/+-.";
 
 
@@ -48,30 +46,36 @@ function tokenization(expression) {
 
     if (expression.length == 0) {
         return 'invalid'
-        
     }
 
-    if(expression == null || operators.includes(expression[0])){
+    if (expression == null || operators.includes(expression[0])) {
         return 'invalid'
     }
 
     for (let i = 0; i < expression.length; i++) {
         let char = expression[i];
-        if((char <= '9' && char >= '0') || char == '.'){
-            if(buffer.includes('.') && char == '.'){
+
+        if (char == ' ') {
+            continue;
+        }
+
+        if ((char <= '9' && char >= '0') || char == '.') {
+            if (buffer.includes('.') && char == '.') {
                 return 'invalid'
-            }else{
+            } else {
                 buffer += char;
             }
-        }else{
-            if(buffer.length > 0){
+        } else {
+            if (buffer.length > 0) {
                 tokens.push(buffer)
                 buffer = ''
             }
 
-            buffer+= char;
+            buffer += char;
 
-            if(tokens[tokens.length -1] == buffer){
+            if (tokens[tokens.length - 1] == buffer && (char != '(' && char != ')')) {
+                console.log("hssss");
+
                 return 'invalid'
             }
 
@@ -81,11 +85,12 @@ function tokenization(expression) {
 
 
     }
-    if(buffer.length > 0 ){
+    
+    if (buffer.length > 0) {
         tokens.push(buffer)
     }
 
-    if(operators.includes(tokens[tokens.length -1])){
+    if (operators.includes(tokens[tokens.length - 1])) {
         return 'invalid'
     }
 
@@ -94,47 +99,78 @@ function tokenization(expression) {
 
 }
 
-function evaluateTokens(tokens){
-    for(let i = 0; i < tokens.length; i++){
+function evaluateTokens(tokens) {
+
+
+    while (tokens.includes('(')) {
+
+        let start = -1;
+        let end = -1;
+
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i] === '(') {
+                start = i;
+            }
+            else if (tokens[i] === ')') {
+                end = i;
+                break;
+            }
+        }
+
+        if (start === -1 || end === -1) {
+            return 'Syntax Error';
+        }
+
+        const innerTokens = tokens.slice(start + 1, end);
+        const innerResult = evaluateTokens(innerTokens);
+
+        tokens.splice(start, end - start + 1, innerResult.toString());
+    }
+
+    for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
-        if(token == '*' || token == '/'){
-            let left = parseFloat(tokens[i -1]);
-            let right = parseFloat(tokens[i +1]);
+        if (token == '*' || token == '/') {
+            let left = parseFloat(tokens[i - 1]);
+            let right = parseFloat(tokens[i + 1]);
             let result = 0;
 
-            if(token == '*'){
+            if (token == '*') {
                 result = left * right;
-            }else if(token == '/'){
+            } else if (token == '/') {
+                if (right == 0) {
+                    return "Cant divide by zero"
+                }
                 result = left / right;
             }
 
-            tokens.splice(i -1, 3, result.toString());
+            tokens.splice(i - 1, 3, result.toString());
             i--;
         }
     }
 
-    for(let i = 0; i < tokens.length; i++){
+    for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
-        if(token == '+' || token == '-'){
-            let left = parseFloat(tokens[i -1]);
-            let right = parseFloat(tokens[i +1]);
+        if (token == '+' || token == '-') {
+            let left = parseFloat(tokens[i - 1]);
+            let right = parseFloat(tokens[i + 1]);
             let result = 0;
 
-            if(token == '+'){
+            if (token == '+') {
                 result = left + right;
-            }else if(token == '-'){
+            } else if (token == '-') {
                 result = left - right;
             }
 
-            tokens.splice(i -1, 3, result.toString());
+            tokens.splice(i - 1, 3, result.toString());
             i--;
         }
     }
 
-    if(tokens.length == 1){
-        input.value = tokens[0];
-    }else{
+    if (tokens.length == 1) {
+        return tokens[0];
+    } else {
         input.value = 'Sytrax Error';
+        return;
     }
 }
 
@@ -174,12 +210,18 @@ input.addEventListener('keyup', (keyPress) => {
         let expression = input.value
         // console.log(expression);
         const tokens = tokenization(expression)
+        console.log(tokens);
 
         if (tokens === 'invalid') {
             input.value = 'Sytrax Error';
             return;
-        }else{
-            evaluateTokens(tokens);
+        } else {
+            const result = evaluateTokens(tokens);
+
+            if (result) {
+                console.log(result);
+                input.value = result;
+            }
         }
 
         console.log(tokens);
