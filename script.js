@@ -194,54 +194,47 @@ function evaluateTokens(tokens) {
     while (tokens.includes('√')) {
         const rootIndex = tokens.indexOf('√')
 
-        let start = rootIndex;
-        let end = rootIndex;
-
-        for (let i = rootIndex; i < tokens.length; i++) {
-            if (tokens[i] === '(') {
-                start = i;
-            }
-            else if (tokens[i] === ')') {
-                end = i;
-                break;
-            }
-        }
-
-        if (start === rootIndex || end === rootIndex) {
-            return 'Syntax Error';
-        }
-        const res = evaluateTokens(tokens.slice(start + 1, end));
-        console.log(res);
-        const funcResult = Math.sqrt(res);
-        console.log(tokens.splice(rootIndex, end - start + 2, funcResult));
-
-
-    }
-
-    while (tokens.includes('(')) {
-
         let start = -1;
         let end = -1;
 
-        for (let i = 0; i < tokens.length; i++) {
-            if (tokens[i] === '(') {
-                start = i;
+        if (tokens[rootIndex + 1] === '(') {
+            let count = 0;
+
+            for (let i = rootIndex + 1; i < tokens.length; i++) {
+                if (tokens[i] === '(') {
+                    if (count === 0) start = i;
+                    count++;
+                }
+                else if (tokens[i] === ')') {
+                    count--;
+                    if (count === 0) {
+                        end = i;
+                        break;
+                    }
+                }
             }
-            else if (tokens[i] === ')') {
-                end = i;
-                break;
+
+            if (start === -1 || end === -1) {
+                return 'Syntax Error';
             }
+
+            var res = evaluateTokens(tokens.slice(start + 1, end));
+
+            tokens.splice(rootIndex, end - rootIndex + 1, Math.sqrt(res));
         }
 
-        if (start === -1 || end === -1) {
-            return 'Syntax Error';
+        else {
+            const nextToken = tokens[rootIndex + 1];
+
+            const funcResult = Math.sqrt(Number(nextToken));
+            console.log(funcResult);
+
+            if (isNaN(funcResult)) {
+                return 'Syntax Error'
+            }
+
+            tokens.splice(rootIndex, 2, funcResult);
         }
-
-        const innerTokens = tokens.slice(start + 1, end);
-        const innerResult = evaluateTokens(innerTokens);
-        console.log("Inner Result ", innerResult);
-
-        tokens.splice(start, end - start + 1, innerResult.toString());
 
     }
 
