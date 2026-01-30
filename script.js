@@ -238,6 +238,33 @@ function evaluateTokens(tokens) {
 
     }
 
+    while (tokens.includes('(')) {
+
+        let start = -1;
+        let end = -1;
+
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i] === '(') {
+                start = i;
+            }
+            else if (tokens[i] === ')') {
+                end = i;
+                break;
+            }
+        }
+
+        if (start === -1 || end === -1) {
+            return 'Syntax Error';
+        }
+
+        const innerTokens = tokens.slice(start + 1, end);
+        const innerResult = evaluateTokens(innerTokens);
+        console.log("Inner Result ", innerResult);
+
+        tokens.splice(start, end - start + 1, innerResult.toString());
+
+    }
+
     for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
         if (token == '*' || token == '/') {
