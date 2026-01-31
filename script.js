@@ -276,15 +276,25 @@ function evaluateTokens(tokens) {
     }
 
 
-    while (tokens.includes('√') || tokens.includes('log') || tokens.includes('ln') || tokens.includes('π')) {
+    while (tokens.includes('√') || tokens.includes('log') || tokens.includes('ln') || tokens.includes('π') || tokens.includes('mod')) {
         console.log(tokens);
 
         if (tokens.includes('π')) {
             let piIndex = tokens.indexOf('π')
             tokens.splice(piIndex, 1, Math.PI.toString())
             continue;
+        } else if (tokens.includes('mod')) {
+            let modIndex = tokens.indexOf('mod')
+            let left = parseFloat(tokens[modIndex - 1]);
+            let right = parseFloat(tokens[modIndex + 1])
+            let result = left % right;
+            if (isNaN(result)) {
+                return 'invalid'
+            }
+
+            tokens.splice(modIndex - 1, 3, result)
+            continue;
         }
-        console.log(tokens);
 
         let index = -1;
         let func = '';
@@ -328,7 +338,7 @@ function evaluateTokens(tokens) {
 
     for (let i = 0; i < tokens.length; i++) {
         let token = tokens[i];
-        if (token == '*' || token == '/' || token == 'mod') {
+        if (token == '*' || token == '/') {
             let left = parseFloat(tokens[i - 1]);
             let right = parseFloat(tokens[i + 1]);
             let result = 0;
