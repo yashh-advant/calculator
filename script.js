@@ -13,6 +13,8 @@ calMode.addEventListener('change', (e) => {
             btn.classList.add('hidden');
         });
     }
+
+    input.focus();
 });
 
 
@@ -22,6 +24,7 @@ input.focus();
 
 const functions = ["sin", "cos", "tan", "√", "%"];
 const operators = "*/+-.";
+
 
 
 function clearInput() {
@@ -48,7 +51,7 @@ function tokenization(expression) {
         return 'invalid'
     }
 
-    if (expression == null || operators.includes(expression[0])) {
+    if (expression == null) {
         return 'invalid'
     }
 
@@ -97,8 +100,11 @@ function tokenization(expression) {
 
             buffer += char;
 
-            if (tokens[tokens.length - 1] == buffer && (char != '(' && char != ')')) {
+            if (tokens[tokens.length - 1] == buffer && (char != '(' && char != ')') && char != '√') {
                 return 'invalid'
+            }
+            if (i == 0 && operators.includes(expression[i])) {
+                continue;
             }
 
             tokens.push(buffer)
@@ -186,74 +192,106 @@ function evaluateTokens(tokens) {
         }
 
         funcResult = Number(funcResult.toFixed(10));
+        console.log(funcResult);
+
 
         tokens.splice(start - 1, end - start + 2, funcResult);
     }
 
+    // while (tokens.includes('√')) {
+    //     const rootIndex = tokens.indexOf('√')
 
-    while (tokens.includes('√')) {
-        const rootIndex = tokens.indexOf('√')
+    //     if (tokens[rootIndex + 1] == '√') {
+    //         let innerRes = evaluateTokens(tokens.slice(rootIndex + 1))
+    //         // console.log(innerRes);
+    //         // console.log(tokens);
+    //         if (isNaN(innerRes)) {
+    //             return 'invalid'
+    //         }
+    //         tokens.splice(rootIndex + 1, 2, innerRes)
+    //     }
 
-        let start = -1;
-        let end = -1;
+    //     let start = -1;
+    //     let end = -1;
 
-        if (tokens[rootIndex + 1] === '(') {
-            let count = 0;
+    //     if (tokens[rootIndex + 1] === '(') {
+    //         let count = 0;
 
-            for (let i = rootIndex + 1; i < tokens.length; i++) {
-                if (tokens[i] === '(') {
-                    if (count === 0) start = i;
-                    count++;
-                }
-                else if (tokens[i] === ')') {
-                    count--;
-                    if (count === 0) {
-                        end = i;
-                        break;
-                    }
-                }
-            }
+    //         for (let i = rootIndex + 1; i < tokens.length; i++) {
+    //             if (tokens[i] === '(') {
+    //                 if (count === 0) start = i;
+    //                 count++;
+    //             }
+    //             else if (tokens[i] === ')') {
+    //                 count--;
+    //                 if (count === 0) {
+    //                     end = i;
+    //                     break;
+    //                 }
+    //             }
+    //         }
 
-            if (start === -1 || end === -1) {
-                return 'Syntax Error';
-            }
+    //         if (start === -1 || end === -1) {
+    //             return 'Syntax Error';
+    //         }
 
-            var res = evaluateTokens(tokens.slice(start + 1, end));
+    //         let res = evaluateTokens(tokens.slice(start + 1, end));
 
-            tokens.splice(rootIndex, end - rootIndex + 1, Math.sqrt(res));
-        }
+    //         if (res < 0) {
+    //             res = `${Math.sqrt(Math.abs(res))}i`
+    //             console.log(res);
 
-        else {
-            const nextToken = tokens[rootIndex + 1];
+    //         }
 
-            const funcResult = Math.sqrt(Number(nextToken));
-            console.log(funcResult);
+    //         tokens.splice(rootIndex, end - rootIndex + 1, res);
+    //     }
 
-            if (isNaN(funcResult)) {
-                return 'Syntax Error'
-            }
+    //     else {
+    //         const nextToken = tokens[rootIndex + 1];
 
-            tokens.splice(rootIndex, 2, funcResult);
-        }
+    //         const funcResult = Math.sqrt(Number(nextToken));
+    //         console.log(funcResult);
 
-    }
+    //         if (isNaN(funcResult)) {
+    //             console.log(dhsh);
+
+    //             return 'Syntax Error'
+    //         }
+
+    //         tokens.splice(rootIndex, 2, funcResult);
+    //     }
+
+    // }
 
     while (tokens.includes('(')) {
+        //(2 + 3) * (4 + 5)
+
+
 
         let start = -1;
         let end = -1;
+        let count = 0;
 
         for (let i = 0; i < tokens.length; i++) {
-            if (tokens[i] === '(') {
-                start = i;
+            const element = tokens[i];
+            if (element == '(') {
+                if (count == 0) {
+                    start = i;
+                }
+                count++;
+            } else if (element == ')') {
+                count--;
+                if (count == 0) {
+                    end = i;
+                    break;
+                }
             }
-            else if (tokens[i] === ')') {
-                end = i;
-                break;
-            }
+
         }
 
         if (start === -1 || end === -1) {
+            console.log(`srart ${start}   end ${end}`);
+
             return 'Syntax Error';
         }
 
@@ -262,6 +300,21 @@ function evaluateTokens(tokens) {
         console.log("Inner Result ", innerResult);
 
         tokens.splice(start, end - start + 1, innerResult.toString());
+
+    }
+
+    while (tokens.includes('√')) {
+        console.log(tokens);
+        const rootIndex = tokens.lastIndexOf('√')
+        if (tokens[rootIndex + 1]) {
+            let res = Math.sqrt(tokens[rootIndex + 1])
+            console.log(res);
+            tokens.splice(rootIndex, 2, res)
+
+        } else {
+            console.log(tokens[rootIndex + 1]);
+            return 'Syntax Error'
+        }
 
     }
 
@@ -281,6 +334,10 @@ function evaluateTokens(tokens) {
                 result = left / right;
             }
 
+            if (isNaN(result)) {
+                return "Invalid"
+            }
+
             tokens.splice(i - 1, 3, result.toString());
             i--;
         }
@@ -293,10 +350,15 @@ function evaluateTokens(tokens) {
             let right = parseFloat(tokens[i + 1]);
             let result = 0;
 
+
             if (token == '+') {
                 result = left + right;
             } else if (token == '-') {
                 result = left - right;
+            }
+
+            if (isNaN(result)) {
+                return "Invalid"
             }
 
             tokens.splice(i - 1, 3, result.toString());
@@ -314,18 +376,18 @@ function evaluateTokens(tokens) {
 
 btns.forEach(btn => {
     btn.addEventListener('click', (e) => {
-        const value = btn.textContent;
+        const value = btn.textContent?.trim();
         // console.log(value);
 
-        if (value.trim() == 'C') {
+        if (value == 'C') {
             clearInput();
             return;
         }
-        else if (value.trim() == 'Backspace') {
+        else if (value == 'Backspace') {
             handleBackspace();
             return;
         }
-        else if (value.trim() == '=') {
+        else if (value == '=') {
             tokenization(input.value);
             return;
         }
@@ -335,7 +397,7 @@ btns.forEach(btn => {
         else if (functions.includes(input.value.slice(-3)) && functions.includes(value)) {
             return;
         }
-        input.value += value.trim();
+        input.value += value;
 
         input.focus();
     })
@@ -355,13 +417,17 @@ input.addEventListener('keyup', (keyPress) => {
             return;
         } else {
             const result = evaluateTokens(tokens);
+            console.log(result);
 
-            if (result) {
-                console.log(result);
-                input.value = result;
-            }
+            // if (!isNaN(result)) {
+            // console.log(result);
+            input.value = result;
+            // }else{
+            //     in
+            // }
         }
 
+        input.focus();
         console.log(tokens);
 
 
@@ -369,4 +435,38 @@ input.addEventListener('keyup', (keyPress) => {
         return;
     }
 
+})
+
+
+let memory = 0;
+
+const memoryValueParagraph = document.querySelector('.m-val')
+
+document.querySelectorAll('.m-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        console.log(e.target.innerText);
+        const val = e.target.innerText?.trim();
+
+        if (val == 'MC') {
+            memory = 0;
+        }
+        else if (val == 'MR') {
+            input.value += memory;
+            memory = 0;
+        } else {
+            const calInput = Number(input.value)
+            if (isNaN(calInput)) {
+                alert("cant add Expression as Memory")
+            } else {
+                if (val == 'Mr+') {
+                    memory += calInput;
+                } else if (val == 'Mr-') {
+                    memory -= calInput;
+                }
+            }
+        }
+
+        memoryValueParagraph.innerText = memory
+        input.focus();
+    })
 })
