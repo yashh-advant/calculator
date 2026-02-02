@@ -298,7 +298,7 @@ function evaluateTokens(tokens) {
         let func = '';
 
         if (tokens.includes('√')) {
-            index = tokens.indexOf('√');
+            index = tokens.lastIndexOf('√');
             func = '√';
         } else if (tokens.includes('log')) {
             index = tokens.indexOf('log');
@@ -447,7 +447,7 @@ btns.forEach(btn => {
             return;
         }
         else if (value == '=') {
-            tokenization(input.value);
+            showOutput(input.value);
             return;
         }
         else if (value == 'xʸ') {
@@ -468,20 +468,21 @@ btns.forEach(btn => {
 input.addEventListener('keyup', (keyPress) => {
     if (keyPress.key == 'Enter') {
         let expression = input.value
+        showOutput(expression);
         // console.log(expression);
-        const tokens = tokenization(expression?.toLowerCase())
-        console.log(tokens);
+        // const tokens = tokenization(expression?.toLowerCase())
+        // console.log(tokens);
 
-        if (tokens === 'invalid') {
-            input.value = 'Syntax Error';
-            return;
-        } else {
-            const result = evaluateTokens(tokens);
-            console.log(result);
-            input.value = result;
-        }
-        input.focus();
-        console.log(tokens);
+        // if (tokens === 'invalid') {
+        //     input.value = 'Syntax Error';
+        //     return;
+        // } else {
+        //     const result = evaluateTokens(tokens);
+        //     console.log(result);
+        //     input.value = result;
+        // }
+        // input.focus();
+        // console.log(tokens);
 
 
     } else {
@@ -489,6 +490,22 @@ input.addEventListener('keyup', (keyPress) => {
     }
 
 })
+
+function showOutput(expression) {
+    const tokens = tokenization(expression?.toLowerCase())
+    console.log(tokens);
+
+    if (tokens === 'invalid') {
+        input.value = 'Syntax Error';
+        return;
+    } else {
+        const result = evaluateTokens(tokens);
+        console.log(result);
+        input.value = result;
+    }
+    input.focus();
+    console.log(tokens);
+}
 
 
 let memory = 0;
