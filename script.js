@@ -1,19 +1,21 @@
 const calMode = document.getElementById('cal-mode');
 
-calMode.addEventListener('change', (e) => {
-    const mode = e.target.value;
-    if (mode === 'scientific') {
+calMode.addEventListener('click', (e) => {
+    const mode = calMode.innerText.trim();
+    if (mode === 'change to Scientific') {
         document.querySelectorAll('.scify-btn').forEach(btn => {
             btn.classList.remove('hidden');
         });
-
         document.getElementById('backspace').classList.remove('col-span-2');
-    } else if (mode === 'basic') {
+        calMode.innerText = 'change to Basic';
+    }
+    else if (mode === 'change to Basic') {
         document.querySelectorAll('.scify-btn').forEach(btn => {
             btn.classList.add('hidden');
         });
+        document.getElementById('backspace').classList.add('col-span-2');
+        calMode.innerText = 'change to Scientific';
     }
-
     input.focus();
 });
 
@@ -126,9 +128,8 @@ function tokenization(expression) {
 
             return 'invalid'
 
-
-
         } else {
+
             if (buffer.length > 0) {
                 tokens.push(buffer)
                 buffer = ''
@@ -146,8 +147,6 @@ function tokenization(expression) {
             tokens.push(buffer)
             buffer = ''
         }
-
-
     }
 
     if (buffer.length > 0) {
@@ -158,12 +157,12 @@ function tokenization(expression) {
         return 'invalid'
     }
 
-
     return tokens;
-
 }
 
 function evaluateTokens(tokens) {
+
+    // console.log(tokens);
 
 
     while (tokens.includes('(')) {
@@ -275,7 +274,6 @@ function evaluateTokens(tokens) {
         tokens.splice(rootIndex, 2, Number(res.toFixed(10)));
     }
 
-
     while (tokens.includes('√') || tokens.includes('log') || tokens.includes('ln') || tokens.includes('π') || tokens.includes('mod')) {
         console.log(tokens);
 
@@ -317,15 +315,21 @@ function evaluateTokens(tokens) {
             if (isNaN(value)) return 'Syntax Error';
 
             if (func === '√') {
-                if (value < 0) return 'Invalid';
+                if (value < 0) {
+                    return 'Invalid'
+                }
                 res = Math.sqrt(value);
             }
             else if (func === 'log') {
-                if (value <= 0) return 'Invalid';
+                if (value <= 0) {
+                    return 'Invalid'
+                }
                 res = Math.log10(value);
             }
             else if (func === 'ln') {
-                if (value <= 0) return 'Invalid';
+                if (value <= 0) {
+                    return 'Invalid'
+                }
                 res = Math.log(value);
             }
 
@@ -334,6 +338,40 @@ function evaluateTokens(tokens) {
             return 'Syntax Error';
         }
 
+    }
+
+    while (tokens.includes('%') || tokens.includes('^')) {
+        // console.log(tokens);
+        let index = 0;
+        let func = '';
+        if (tokens.includes('%')) {
+            index = tokens.indexOf('%');
+            func = '%';
+        } else if (tokens.includes('^')) {
+            index = tokens.indexOf('^');
+            func = '^';
+        }
+
+        if (func == '%') {
+            let left = parseFloat(tokens[index - 3]);
+            let right = parseFloat(tokens[index - 1]);
+            let result = left * right / 100;
+            if (isNaN(result)) {
+                return 'Syntax Error';
+            }
+            tokens.splice(index - 1, 3, result.toString());
+        } else if (func == '^') {
+            let left = parseFloat(tokens[index - 1]);
+            let right = parseFloat(tokens[index + 1]);
+            if (left == 0) {
+                return 'Syntax Error';
+            }
+            let result = Math.pow(left, right);
+            if (isNaN(result)) {
+                return 'Syntax Error';
+            }
+            tokens.splice(index - 1, 3, result.toString());
+        }
     }
 
     for (let i = 0; i < tokens.length; i++) {
@@ -390,8 +428,8 @@ function evaluateTokens(tokens) {
     if (tokens.length == 1) {
         return tokens[0];
     } else {
-        input.value = 'Syntax Error';
-        return;
+        // input.value = 'Syntax Error';
+        return 'Syntax Error';
     }
 }
 
@@ -412,19 +450,20 @@ btns.forEach(btn => {
             tokenization(input.value);
             return;
         }
-        else if (operators.includes(input.value[input.value.length - 1]) && operators.includes(value)) {
+        else if (value == 'xʸ') {
+            input.value += '^';
+            input.focus();
             return;
         }
-        else if (functions.includes(input.value.slice(-3)) && functions.includes(value)) {
+        else if (value == 'x2') {
+            input.value += '^2';
+            input.focus();
             return;
         }
         input.value += value;
-
         input.focus();
     })
 })
-
-
 
 input.addEventListener('keyup', (keyPress) => {
     if (keyPress.key == 'Enter') {
@@ -434,7 +473,7 @@ input.addEventListener('keyup', (keyPress) => {
         console.log(tokens);
 
         if (tokens === 'invalid') {
-            input.value = 'Sytrax Error';
+            input.value = 'Syntax Error';
             return;
         } else {
             const result = evaluateTokens(tokens);
